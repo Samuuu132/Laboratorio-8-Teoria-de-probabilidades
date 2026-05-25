@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 # PARÁMETROS GENERALES
 # ============================================================
 
-N = 100           # número total de estampas
-S = 7             # estampas por sobre
-R = 10000         # número de simulaciones
-PRECIO = 9.50     # precio por sobre
+N = 100
+S = 7
+R = 10000
+PRECIO = 9.50
 PRESUPUESTO = 1000.0
 PRECIO_CAJA = 975.0
 SOBRES_CAJA = 104
@@ -22,15 +22,7 @@ np.random.seed(2026)
 
 # ============================================================
 # ETAPA 3
-# Incorporación del presupuesto y costo
-# ============================================================
-
-print("================================================")
-print("RESULTADOS ETAPA 3")
-print("================================================\n")
-
-# ============================================================
-# SIMULACIÓN CON PRESUPUESTO (SOBRES SUELTOS)
+# Simulación con presupuesto (sobres sueltos)
 # ============================================================
 
 completados = []
@@ -58,17 +50,16 @@ completados = np.array(completados)
 sobres_comprados = np.array(sobres_comprados)
 estampas_finales = np.array(estampas_finales)
 
-# ============================================================
-# ESTADÍSTICAS SOBRES SUELTOS
-# ============================================================
-
 prob_exito = np.mean(completados)
 media_sobres = np.mean(sobres_comprados)
 media_estampas_fallo = np.mean(estampas_finales[completados == 0])
 
+print("================================================")
+print("RESULTADOS ETAPA 3")
+print("================================================\n")
 print(f"Probabilidad de completar el álbum: {prob_exito:.4f}")
 print(f"Sobres esperados comprados: {media_sobres:.4f}")
-print(f"Estampas distintas promedio (casos fallidos): {media_estampas_fallo:.4f}\n")
+print(f"Estampas distintas promedio (casos fallidos): {media_estampas_fallo:.4f}")
 
 # ============================================================
 # PREGUNTA 1 - MÁXIMO DE SOBRES Y MÍNIMO TEÓRICO
@@ -77,10 +68,10 @@ print(f"Estampas distintas promedio (casos fallidos): {media_estampas_fallo:.4f}
 max_sobres = int(PRESUPUESTO // PRECIO)
 min_teorico = int(np.ceil(N / S))
 
-print(f"1. Máximo de sobres con Q{PRESUPUESTO:.2f}: {max_sobres}")
+print(f"\n1. Máximo de sobres con Q{PRESUPUESTO:.2f}: {max_sobres}")
 print(f"   Mínimo teórico sin repetidos: {min_teorico}")
 print(f"   Con {max_sobres} sobres se obtienen hasta {max_sobres * S} estampas")
-print(f"   ¿Es suficiente en teoría?: {'Sí' if max_sobres * S >= N else 'No'}\n")
+print(f"   ¿Es suficiente en teoría?: {'Sí' if max_sobres * S >= N else 'No'}")
 
 # ============================================================
 # PREGUNTA 2 - SIMULACIÓN CON CAJA
@@ -101,10 +92,10 @@ for _ in range(R):
 completados_caja = np.array(completados_caja)
 prob_caja = np.mean(completados_caja)
 
-print(f"2. Probabilidad completar con caja ({SOBRES_CAJA} sobres): {prob_caja:.4f}")
+print(f"\n2. Probabilidad completar con caja ({SOBRES_CAJA} sobres): {prob_caja:.4f}")
 print(f"   Probabilidad completar con sobres sueltos: {prob_exito:.4f}")
 print(f"   Diferencia: {prob_caja - prob_exito:+.4f}")
-print(f"   ¿Conviene la caja?: {'Sí' if prob_caja > prob_exito else 'No'}\n")
+print(f"   ¿Conviene la caja?: {'Sí' if prob_caja > prob_exito else 'No'}")
 
 # ============================================================
 # PREGUNTA 3 - ESTRATEGIA MIXTA
@@ -129,10 +120,10 @@ for _ in range(R):
 completados_mixta = np.array(completados_mixta)
 prob_mixta = np.mean(completados_mixta)
 
-print(f"3. Presupuesto restante tras caja: Q{restante:.2f}")
+print(f"\n3. Presupuesto restante tras caja: Q{restante:.2f}")
 print(f"   Sobres adicionales posibles: {sobres_extra}")
 print(f"   Total sobres estrategia mixta: {total_mixta}")
-print(f"   Probabilidad completar (mixta): {prob_mixta:.4f}\n")
+print(f"   Probabilidad completar (mixta): {prob_mixta:.4f}")
 
 # ============================================================
 # VISUALIZACIÓN ETAPA 3
@@ -140,17 +131,22 @@ print(f"   Probabilidad completar (mixta): {prob_mixta:.4f}\n")
 
 etiquetas = [f'Sueltos\n(Q{PRESUPUESTO:.0f})', f'Caja\n(Q{PRECIO_CAJA:.0f})', 'Mixta']
 probs = [prob_exito, prob_caja, prob_mixta]
+colores = ['#2ecc71', '#3498db', '#9b59b6']
 
 fig, axes = plt.subplots(1, 3, figsize=(12, 5))
 
-for ax, etiqueta, prob in zip(axes, etiquetas, probs):
+for ax, etiqueta, prob, color in zip(axes, etiquetas, probs, colores):
 
-    ax.bar(['Completado', 'No completado'], [prob, 1 - prob])
-    ax.set_title(etiqueta)
+    ax.bar(['Completado', 'No completado'], [prob, 1 - prob],
+           color=[color, '#e74c3c'])
+    ax.set_title(etiqueta, fontsize=11)
     ax.set_ylim(0, 1)
     ax.set_ylabel('Proporción')
 
-plt.suptitle('Etapa 3 - Proporción de éxito por estrategia')
+    for j, v in enumerate([prob, 1 - prob]):
+        ax.text(j, v + 0.02, f'{v:.3f}', ha='center', fontsize=10, fontweight='bold')
+
+plt.suptitle('Etapa 3 - Proporción de éxito por estrategia', fontsize=13)
 plt.tight_layout()
 plt.show()
 
@@ -222,16 +218,11 @@ for K in K_valores:
 
             sobres += 1
 
-            canjes = repetidas // K
-
-            if canjes > 0:
+            if repetidas >= K:
                 faltantes = list(set(range(N)) - coleccion)
-                canjes_reales = min(canjes, len(faltantes))
-
-                if canjes_reales > 0:
-                    elegidas = np.random.choice(faltantes, size=canjes_reales, replace=False)
-                    coleccion.update(elegidas)
-                    repetidas -= canjes_reales * K
+                if len(faltantes) > 0:
+                    coleccion.add(faltantes[0])
+                    repetidas -= K
 
         sobres_k.append(sobres)
 
@@ -250,11 +241,13 @@ for K in K_valores:
 
 plt.figure(figsize=(10, 6))
 
-plt.hist(sobres_sin, bins=40, alpha=0.5, label='Sin intercambio', density=True)
+plt.hist(sobres_sin, bins=20, alpha=0.5, label='Sin intercambio', density=True)
 
 for K in K_valores:
-    plt.hist(resultados_k[K], bins=40, alpha=0.45, label=f'K={K}', density=True)
+    plt.hist(resultados_k[K], bins=20, alpha=0.45, label=f'K={K}', density=True)
 
+plt.xlim(0, 100)
+plt.ylim(0, 0.15)
 plt.xlabel("Número de sobres")
 plt.ylabel("Densidad")
 plt.title("Parte A - Distribución de sobres hasta completar el álbum")
@@ -320,16 +313,11 @@ for K in K_valores:
                     else:
                         coleccion.add(e)
 
-                canjes = repetidas // K
-
-                if canjes > 0:
+                if repetidas >= K:
                     faltantes = list(set(range(N)) - coleccion)
-                    canjes_reales = min(canjes, len(faltantes))
-
-                    if canjes_reales > 0:
-                        elegidas = np.random.choice(faltantes, size=canjes_reales, replace=False)
-                        coleccion.update(elegidas)
-                        repetidas -= canjes_reales * K
+                    if len(faltantes) > 0:
+                        coleccion.add(faltantes[0])
+                        repetidas -= K
 
                 if len(coleccion) == N:
                     break
@@ -386,12 +374,21 @@ for nombre, probs in todas.items():
     print(fila)
 
 # ============================================================
-# PREGUNTAS DE ANÁLISIS
+# PREGUNTAS DE ANÁLISIS ETAPA 4
 # ============================================================
 
 print("\n================================================")
 print("PREGUNTAS DE ANÁLISIS ETAPA 4")
 print("================================================\n")
+
+# Pregunta 1
+print("1. Efecto de disminuir K:")
+for K in K_valores:
+    media_k = np.mean(resultados_k[K])
+    reduccion = (media_sin - media_k) / media_sin * 100
+    print(f"   K={K:2d} --> media = {media_k:.2f} sobres  reducción = {reduccion:.2f}%")
+print("   La relación NO es lineal: pasar de K=10 a K=5 reduce más")
+print("   que pasar de K=2 a K=1.\n")
 
 # Pregunta 2
 media_k2 = np.mean(resultados_k[2])
@@ -409,9 +406,20 @@ print(f"3. P(éxito) a M=45:")
 print(f"   Sin intercambio: {probs_sin[idx_45]:.4f}")
 for K in K_valores:
     print(f"   K={K:2d}: {probs_k[K][idx_45]:.4f}")
+print()
+
+# Pregunta 4
+print("4. Valor de K con poco beneficio adicional:")
+for K in K_valores:
+    media_k = np.mean(resultados_k[K])
+    reduccion = (media_sin - media_k) / media_sin * 100
+    print(f"   K={K:2d} --> reducción acumulada = {reduccion:.2f}%")
+print("   A partir de K=2 la mejora adicional es pequeña.")
+print("   De K=2 a K=1 la reducción extra es mínima.\n")
 
 # Pregunta 5
-print(f"\n5. Costo efectivo por estampa nueva via canje:")
+print("5. Costo efectivo por estampa nueva via canje:")
 for K in K_valores:
     costo = (K * PRECIO) / S
     print(f"   K={K:2d} --> Q{costo:.4f} por estampa")
+print("   K=1 es la tasa más rentable por estampa obtenida.")
